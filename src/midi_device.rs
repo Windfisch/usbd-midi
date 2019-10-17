@@ -3,13 +3,13 @@ use usb_device::Result;
 use crate::notes::Note;
 use crate::usb_constants::*;
 
-//const MIDI_IN_SIZE: u8 = 0x06;
+const MIDI_IN_SIZE: u8 = 0x06;
 const MIDI_OUT_SIZE: u8 = 0x09;
 
 pub struct MidiClass<'a,B: UsbBus> {
     standard_ac: InterfaceNumber,
     standard_mc: InterfaceNumber,
-    //standard_bulkout: EndpointOut<'a, B>,
+    standard_bulkout: EndpointOut<'a, B>,
     standard_bulkin: EndpointIn<'a,B>
 }
 
@@ -20,7 +20,7 @@ impl<B: UsbBus> MidiClass<'_, B> {
         MidiClass {
             standard_ac: alloc.interface(),
             standard_mc: alloc.interface(),
-            //standard_bulkout : alloc.bulk(64),
+            standard_bulkout : alloc.bulk(64),
             standard_bulkin: alloc.bulk(64)
         }
     }
@@ -46,7 +46,16 @@ impl<B: UsbBus> MidiClass<'_, B> {
                 vel & 0x7f //vel
             ])
     }
-
+	
+	pub fn poll(&mut self, data : &mut [u8; 64]) -> Result<usize> {
+		self.standard_bulkout.read(data)
+		/*match self.standard_bulkout.read(&mut data) {
+			Ok(size) => {self.note_on(0, crate::notes::Note::A4, size as u8).ok();},
+			Err(usb_device::UsbError::WouldBlock) => (),
+			Err(usb_device::UsbError::BufferOverflow) => {self.note_on(0, crate::notes::Note::A5, 0x42).ok();},
+			Err(_) => {self.note_on(0, crate::notes::Note::A6, 0x13).ok();},
+		}*/
+	}
 }
 
 impl<B: UsbBus> UsbClass<B> for MidiClass<'_, B> {
@@ -90,13 +99,13 @@ impl<B: UsbBus> UsbClass<B> for MidiClass<'_, B> {
             &[
                 MS_HEADER_SUBTYPE,
                 0x00,0x01, //REVISION
-                (0x07 + MIDI_OUT_SIZE),0x00 //Total size of class specific descriptors? (little endian?)
+                (0x07 + MIDI_OUT_SIZE + MIDI_IN_SIZE),0x00 //Total size of class specific descriptors? (little endian?)
             ]
         )?;
     
         //JACKS
 
-/*         writer.write(
+         writer.write(
             CS_INTERFACE,
             &[
                 MIDI_IN_JACK_SUBTYPE,
@@ -104,7 +113,7 @@ impl<B: UsbBus> UsbClass<B> for MidiClass<'_, B> {
                 0x01, // id
                 0x00
             ]
-        )?; */
+        )?;
 
         writer.write (
             CS_INTERFACE,
@@ -119,7 +128,7 @@ impl<B: UsbBus> UsbClass<B> for MidiClass<'_, B> {
             ]
         )?;
 
-/*         writer.endpoint(&self.standard_bulkout)?;
+        writer.endpoint(&self.standard_bulkout)?;
 
         writer.write(
             CS_ENDPOINT,
@@ -128,7 +137,7 @@ impl<B: UsbBus> UsbClass<B> for MidiClass<'_, B> {
                 0x01,
                 0x01
             ]
-        )?; */
+        )?;
 
         writer.endpoint(&self.standard_bulkin)?;
 
