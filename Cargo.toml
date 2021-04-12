@@ -16,3 +16,6 @@ usb-device = "0.2.3"
 [dependencies.num_enum]
 version = "0.5.1"
 default-features = false
+
+[patch.crates-io]
+usb-device = { git = "https://github.com/Windfisch/usb-device", branch = "endpoint_with_additional_data" }

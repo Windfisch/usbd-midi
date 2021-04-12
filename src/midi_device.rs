@@ -190,8 +190,7 @@ impl<B: UsbBus> UsbClass<B> for MidiClass<'_, B> {
             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 // jack mappings. must be filled in and cropped.
         ];
 
-        writer.endpoint(&self.standard_bulkout)?; // len = 9
-
+        writer.endpoint_with_additional_data(&self.standard_bulkout, [0, 0].iter().cloned())?; // len = 9
         endpoint_data[1] = self.n_out_jacks;
         for i in 0..self.n_out_jacks {
             endpoint_data[2 + i as usize] = self.in_jack_id_emb(i);
@@ -201,7 +200,7 @@ impl<B: UsbBus> UsbClass<B> for MidiClass<'_, B> {
             &endpoint_data[0..2+self.n_out_jacks as usize]
         )?;
 
-        writer.endpoint(&self.standard_bulkin)?; // len = 9
+        writer.endpoint_with_additional_data(&self.standard_bulkin, [0, 0].iter().cloned())?; // len = 9
         endpoint_data[1] = self.n_in_jacks;
         for i in 0..self.n_in_jacks {
             endpoint_data[2 + i as usize] = self.out_jack_id_emb(i);
