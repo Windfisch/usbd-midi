@@ -31,7 +31,7 @@ impl U4 {
     /// Combines two nibbles (u4) eg half byte
     /// result will be a full byte
     pub fn combine(upper:U4,lower:U4) -> u8 {
-        let upper = upper.0.overflowing_shl(8).0;
+        let upper = upper.0 << 4;
         let lower = lower.0 & U4::MAX.0;
         upper | lower
     }
@@ -42,5 +42,17 @@ impl U4 {
         const MASK :u8 = 0b0000_1111;
         let number = MASK & value;
         U4(number)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn u4_combine() {
+        let upper = U4::from_overflowing_u8(0x5);
+        let lower = U4::from_overflowing_u8(0xF);
+        assert_eq!(U4::combine(upper, lower), 0x5F);
     }
 }
