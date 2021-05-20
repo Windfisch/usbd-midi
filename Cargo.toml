@@ -18,4 +18,4 @@ version = "0.5.1"
 default-features = false
 
 [patch.crates-io]
-usb-device = { git = "https://github.com/Windfisch/usb-device", branch = "endpoint_with_additional_data" }
+usb-device = { git = "https://github.com/mvirkkunen/usb-device", branch = "descriptor-writer-updates" }
