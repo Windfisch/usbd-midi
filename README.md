@@ -35,7 +35,7 @@ fn main() -> ! {
 
     let usb_bus = UsbBus::new(usb);
 
-    let mut midi = MidiClass::new(&usb_bus);
+    let mut midi = MidiClass::new(&usb_bus, 1, 1);
 
     let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x16c0, 0x5e4))
         .product("MIDI Test")
